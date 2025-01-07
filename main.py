@@ -9,7 +9,10 @@ app = FastAPI()
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["https://vicentereyes.org"],  # Change this to your frontend's origin
+    allow_origins=[
+        "https://vicentereyes.org",
+        "https://www.vicentereyes.org"
+    ],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],

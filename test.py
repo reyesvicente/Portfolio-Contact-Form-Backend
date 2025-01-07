@@ -1,6 +1,6 @@
 import requests
 
-url = "http://localhost:8000/submit/"
+url = "https://portfolio-contact-form-backend.vercel.app/submit/"
 data = {
     "companyName": "aaaaaaa",
     "companyUrl": "https://www.adminero.com",  # Ensure this is a valid URL
