@@ -1,8 +1,8 @@
 import os
 
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, Depends
 from fastapi.middleware.cors import CORSMiddleware
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 import httpx
 
 app = FastAPI()
@@ -18,7 +18,8 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-DISCORD_WEBHOOK_URL = os.environ.get("FASTAPI_DISCORD_WEBHOOK_URL")  # Replace with your actual Discord webhook URL
+DISCORD_WEBHOOK_URL = os.environ.get("FASTAPI_DISCORD_WEBHOOK_URL")
+CLOUDFLARE_TURNSTILE_SECRET = os.environ.get("CLOUDFLARE_TURNSTILE_SECRET")
 
 # Define the request body model
 class FormData(BaseModel):
@@ -28,11 +29,32 @@ class FormData(BaseModel):
     service: str
     companyName: str
     companyUrl: str
+    turnstile_token: str = Field(..., alias="cf-turnstile-response")
 
+async def verify_turnstile_token(token: str) -> bool:
+    """
+    Verify the Turnstile token using Cloudflare's API.
+    """
+    url = "https://challenges.cloudflare.com/turnstile/v0/siteverify"
+    payload = {
+        "secret": CLOUDFLARE_TURNSTILE_SECRET,
+        "response": token
+    }
+    async with httpx.AsyncClient() as client:
+        response = await client.post(url, data=payload)
+        if response.status_code == 200:
+            result = response.json()
+            return result.get("success", False)
+    return False
 
 @app.post("/submit/")
 @app.post("/submit")
 async def submit_form(form_data: FormData):
+    # Verify the Turnstile token
+    is_valid_token = await verify_turnstile_token(form_data.turnstile_token)
+    if not is_valid_token:
+        raise HTTPException(status_code=400, detail="Invalid Turnstile token")
+
     try:
         # Prepare the message content for Discord
         message_content = {
