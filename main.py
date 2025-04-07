@@ -22,10 +22,10 @@ app.add_middleware(
     allow_origins=[
         "https://vicentereyes.org",
         "https://www.vicentereyes.org",
-        "https://dev.vicentereyes.org/",
+        "https://dev.vicentereyes.org",
     ],
     allow_credentials=True,
-    allow_methods=["*"],
+    allow_methods=["POST"],
     allow_headers=["*"],
 )
 
