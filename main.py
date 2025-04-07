@@ -5,6 +5,9 @@ from pydantic import BaseModel, Field
 from typing import Optional
 import httpx
 import logging
+from dotenv import load_dotenv
+
+load_dotenv()
 
 # Initialize FastAPI app
 app = FastAPI()
@@ -19,6 +22,7 @@ app.add_middleware(
     allow_origins=[
         "https://vicentereyes.org",
         "https://www.vicentereyes.org",
+        "https://dev.vicentereyes.org/",
     ],
     allow_credentials=True,
     allow_methods=["*"],
@@ -26,8 +30,8 @@ app.add_middleware(
 )
 
 # Environment variables
-DISCORD_WEBHOOK_URL = "https://discord.com/api/webhooks/1298557347165241364/QAeVWEQHuhbHPGK6FCg3KrE0Aj7vYSH0pyIhZ6JGntkS2GhtOUvesMPoap6IRxLAXDoo"
-CLOUDFLARE_TURNSTILE_SECRET = "0x4AAAAAABDoaBPfTgbaZKIrVCf54uNqykU"
+DISCORD_WEBHOOK_URL = os.getenv("FASTAPI_DISCORD_WEBHOOK_URL")
+CLOUDFLARE_TURNSTILE_SECRET = os.getenv("CLOUDFLARE_TURNSTILE_SECRET")
 
 # Ensure required environment variables are set
 if not DISCORD_WEBHOOK_URL:
