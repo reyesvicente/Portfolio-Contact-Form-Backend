@@ -25,8 +25,8 @@ app.add_middleware(
         "https://dev.vicentereyes.org",
     ],
     allow_credentials=True,
-    allow_methods=["POST"],
-    allow_headers=["*"],
+    allow_methods=["GET", "POST"],  # Allow these HTTP methods
+    allow_headers=["*"],  # Allow all headers
 )
 
 # Environment variables
