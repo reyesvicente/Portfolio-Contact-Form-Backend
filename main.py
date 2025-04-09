@@ -12,16 +12,17 @@ app.add_middleware(
     allow_origins=[
         "https://vicentereyes.org",
         "https://www.vicentereyes.org",
-        "https://dev.vicentereyes.org"
+        "https://dev.vicentereyes.org",
+        "http://localhost:5173"  # Add this for local development if needed
     ],
     allow_credentials=True,
-    allow_methods=["POST"],
+    allow_methods=["POST", "OPTIONS"],  # Explicitly allow OPTIONS for preflight
     allow_headers=["*"],
 )
 
 # Environment variables
 DISCORD_WEBHOOK_URL = os.environ.get("FASTAPI_DISCORD_WEBHOOK_URL")
-TURNSTILE_SECRET_KEY = os.environ.get("TURNSTILE_SECRET_KEY")  # Add this to your environment variables
+TURNSTILE_SECRET_KEY = os.environ.get("TURNSTILE_SECRET_KEY")
 
 # Define the request body model with Turnstile token
 class FormData(BaseModel):
@@ -31,7 +32,7 @@ class FormData(BaseModel):
     service: str
     companyName: str
     companyUrl: str
-    turnstile_token: str  # Add this field for the Turnstile token
+    turnstile_token: str
 
 # Turnstile validation function
 async def verify_turnstile_token(token: str):
