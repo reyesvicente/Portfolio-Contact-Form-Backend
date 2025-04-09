@@ -13,10 +13,10 @@ app.add_middleware(
         "https://vicentereyes.org",
         "https://www.vicentereyes.org",
         "https://dev.vicentereyes.org",
-        "http://localhost:5173"  # Add this for local development if needed
+        "http://localhost:5173"
     ],
     allow_credentials=True,
-    allow_methods=["POST", "OPTIONS"],  # Explicitly allow OPTIONS for preflight
+    allow_methods=["POST", "OPTIONS"],
     allow_headers=["*"],
 )
 
