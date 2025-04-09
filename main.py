@@ -1,7 +1,7 @@
 import os
-from fastapi import FastAPI, HTTPException, Depends
+from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
-from pydantic import BaseModel, Field
+from pydantic import BaseModel
 from typing import Optional
 import httpx
 import logging
@@ -25,19 +25,16 @@ app.add_middleware(
         "https://dev.vicentereyes.org",
     ],
     allow_credentials=True,
-    allow_methods=["GET", "POST"],  # Allow these HTTP methods
-    allow_headers=["*"],  # Allow all headers
+    allow_methods=["GET", "POST"],
+    allow_headers=["*"],
 )
 
 # Environment variables
 DISCORD_WEBHOOK_URL = os.getenv("FASTAPI_DISCORD_WEBHOOK_URL")
-CLOUDFLARE_TURNSTILE_SECRET = os.getenv("CLOUDFLARE_TURNSTILE_SECRET")
 
 # Ensure required environment variables are set
 if not DISCORD_WEBHOOK_URL:
     raise ValueError("Environment variable FASTAPI_DISCORD_WEBHOOK_URL is not set")
-if not CLOUDFLARE_TURNSTILE_SECRET:
-    raise ValueError("Environment variable CLOUDFLARE_TURNSTILE_SECRET is not set")
 
 # Define the request body model
 class FormData(BaseModel):
@@ -46,35 +43,7 @@ class FormData(BaseModel):
     message: str
     service: str
     companyName: str
-    companyUrl: Optional[str] = None  # Make companyUrl optional
-    turnstile_token: str = Field(..., alias="cf-turnstile-response")
-
-async def verify_turnstile_token(token: str) -> bool:
-    """
-    Verify the Turnstile token using Cloudflare's API.
-    """
-    url = "https://challenges.cloudflare.com/turnstile/v0/siteverify"
-    payload = {
-        "secret": CLOUDFLARE_TURNSTILE_SECRET,
-        "response": token
-    }
-    logger.info(f"Verifying Turnstile token: {token}")
-    try:
-        async with httpx.AsyncClient() as client:
-            response = await client.post(url, data=payload)
-            logger.info(f"Turnstile API response status: {response.status_code}")
-            logger.info(f"Turnstile API response body: {response.text}")
-            if response.status_code == 200:
-                result = response.json()
-                logger.info(f"Turnstile verification result: {result}")
-                if not result.get("success", False):
-                    logger.error(f"Turnstile verification failed with error-codes: {result.get('error-codes')}")
-                return result.get("success", False)
-            else:
-                logger.error(f"Turnstile verification failed with status {response.status_code}: {response.text}")
-    except Exception as e:
-        logger.error(f"Error verifying Turnstile token: {e}")
-    return False
+    companyUrl: Optional[str] = None
 
 @app.post("/submit/")
 @app.post("/submit")
@@ -83,12 +52,7 @@ async def submit_form(form_data: FormData):
     Handle form submission and send data to Discord.
     """
     logger.info(f"Received form data: {form_data.dict()}")
-    # Verify the Turnstile token
-    is_valid_token = await verify_turnstile_token(form_data.turnstile_token)
-    if not is_valid_token:
-        logger.error("Invalid Turnstile token received")
-        raise HTTPException(status_code=400, detail="Invalid Turnstile token")
-
+    
     try:
         # Prepare the message content for Discord
         message_content = {
