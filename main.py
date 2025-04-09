@@ -48,31 +48,27 @@ async def verify_turnstile_token(token: str):
         return result.get("success", False)
 
 @app.post("/submit/")
+@app.post("/submit")  # Handle both with and without trailing slash
 async def submit_form(form_data: FormData):
-    # Verify Turnstile token
-    if not await verify_turnstile_token(form_data.turnstile_token):
-        raise HTTPException(status_code=400, detail="Invalid Turnstile token")
-
     try:
-        # Prepare the message content for Discord
+        # Format the message for Discord
         message_content = {
-            "content": (
-                f"New form submission:\n"
-                f"**Name:** {form_data.name}\n"
-                f"**Email:** {form_data.email}\n"
-                f"**Message:** {form_data.message}\n"
-                f"**Service:** {form_data.service}\n"
-                f"**Company Name:** {form_data.companyName}\n"
-                f"**Company URL:** {form_data.companyUrl}"
-            )
+            "content": f"New form submission: \n"
+                      f"**Name:** {form_data.name}\n"
+                      f"**Email:** {form_data.email}\n"
+                      f"**Message:** {form_data.message}\n"
+                      f"**Service:** {form_data.service}\n"
+                      f"**Company Name:** {form_data.companyName}\n"
+                      f"**Company URL:** {form_data.companyUrl}"
         }
 
-        # Send the message to Discord webhook
+        # Send to Discord webhook
         async with httpx.AsyncClient() as client:
             response = await client.post(DISCORD_WEBHOOK_URL, json=message_content)
 
         if response.status_code != 204:
-            raise HTTPException(status_code=response.status_code, detail="Failed to send message to Discord")
+            raise HTTPException(status_code=response.status_code, 
+                              detail="Failed to send message to Discord")
 
         return {"message": "Form data sent to Discord successfully"}
 
