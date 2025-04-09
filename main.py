@@ -32,20 +32,6 @@ class FormData(BaseModel):
     service: str
     companyName: str
     companyUrl: str
-    turnstile_token: str
-
-# Turnstile validation function
-async def verify_turnstile_token(token: str):
-    async with httpx.AsyncClient() as client:
-        response = await client.post(
-            "https://challenges.cloudflare.com/turnstile/v0/siteverify",
-            data={
-                "secret": TURNSTILE_SECRET_KEY,
-                "response": token
-            }
-        )
-        result = response.json()
-        return result.get("success", False)
 
 @app.post("/submit/")
 @app.post("/submit")  # Handle both with and without trailing slash
