@@ -1,40 +1,25 @@
 import os
+
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
-from typing import Optional
 import httpx
-import logging
-from dotenv import load_dotenv
 
-load_dotenv()
-
-# Initialize FastAPI app
 app = FastAPI()
 
-# Configure logging
-logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger(__name__)
-
-# CORS middleware
 app.add_middleware(
     CORSMiddleware,
     allow_origins=[
         "https://vicentereyes.org",
         "https://www.vicentereyes.org",
-        "https://dev.vicentereyes.org",
+        "https://dev.vicentereyes.org"
     ],
     allow_credentials=True,
-    allow_methods=["GET", "POST"],
+    allow_methods=["POST"],
     allow_headers=["*"],
 )
 
-# Environment variables
-DISCORD_WEBHOOK_URL = os.getenv("FASTAPI_DISCORD_WEBHOOK_URL")
-
-# Ensure required environment variables are set
-if not DISCORD_WEBHOOK_URL:
-    raise ValueError("Environment variable FASTAPI_DISCORD_WEBHOOK_URL is not set")
+DISCORD_WEBHOOK_URL = os.environ.get("FASTAPI_DISCORD_WEBHOOK_URL")  # Replace with your actual Discord webhook URL
 
 # Define the request body model
 class FormData(BaseModel):
@@ -43,16 +28,12 @@ class FormData(BaseModel):
     message: str
     service: str
     companyName: str
-    companyUrl: Optional[str] = None
+    companyUrl: str
+
 
 @app.post("/submit/")
 @app.post("/submit")
 async def submit_form(form_data: FormData):
-    """
-    Handle form submission and send data to Discord.
-    """
-    logger.info(f"Received form data: {form_data.dict()}")
-    
     try:
         # Prepare the message content for Discord
         message_content = {
@@ -71,12 +52,9 @@ async def submit_form(form_data: FormData):
 
         # Check if the request was successful
         if response.status_code != 204:
-            logger.error(f"Failed to send message to Discord: {response.text}")
             raise HTTPException(status_code=response.status_code, detail="Failed to send message to Discord")
         
-        logger.info("Form data sent to Discord successfully")
         return {"message": "Form data sent to Discord successfully"}
     
     except Exception as e:
-        logger.error(f"Error processing form submission: {e}")
-        raise HTTPException(status_code=500, detail="Internal server error")
+        raise HTTPException(status_code=500, detail=str(e))
