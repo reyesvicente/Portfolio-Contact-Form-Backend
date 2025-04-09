@@ -13,7 +13,7 @@ app.add_middleware(
         "https://vicentereyes.org",
         "https://www.vicentereyes.org",
         "https://dev.vicentereyes.org",
-        "http://localhost:5173"
+        "https://staging.vicentereyes.org"
     ],
     allow_credentials=True,
     allow_methods=["POST", "OPTIONS"],
