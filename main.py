@@ -4,7 +4,11 @@ from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 import httpx
 import secrets
+<<<<<<< HEAD
 from datetime import datetime, timedelta # Import timedelta
+=======
+from datetime import datetime, timedelta 
+>>>>>>> e228f51 (added hcaptcha verification)
 from fastapi.responses import JSONResponse
 
 app = FastAPI()
@@ -25,7 +29,11 @@ app.add_middleware(
 
 # Environment variables
 DISCORD_WEBHOOK_URL = os.environ.get("FASTAPI_DISCORD_WEBHOOK_URL")
+<<<<<<< HEAD
 HCAPTCHA_SECRET_KEY = os.environ.get("HCAPTCHA_SECRET_KEY") # You need to set this environment variable
+=======
+HCAPTCHA_SECRET_KEY = os.environ.get("HCAPTCHA_SECRET_KEY") 
+>>>>>>> e228f51 (added hcaptcha verification)
 
 # CSRF token storage
 csrf_tokens = {}
