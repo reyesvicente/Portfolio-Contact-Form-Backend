@@ -10,7 +10,8 @@ app = FastAPI()
 
 origins = [
     "https://vicentereyes.org",
-    "https://www.vicentereyes.org"
+    "https://www.vicentereyes.org",
+    "https://prod.vicentereyes.org"
 ]
 
 app.add_middleware(
