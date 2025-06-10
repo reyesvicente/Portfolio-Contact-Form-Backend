@@ -1,10 +1,11 @@
 import os
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 import httpx
 
-DISCORD_WEBHOOK_URL = "https://discord.com/api/webhooks/1298557347165241364/QAeVWEQHuhbHPGK6FCg3KrE0Aj7vYSH0pyIhZ6JGntkS2GhtOUvesMPoap6IRxLAXDoo"
+DISCORD_WEBHOOK_URL = "https://discord.com/api/webhooks/1298557347165241364/QAeVHEQHuhbHPGK6FCg3KrE0Aj7vYSH0pyIhZ6JGntkS2GhtOUvesMPoap6IRxLAXDoo"
+HCAPTCHA_SECRET_KEY = os.environ.get("HCAPTCHA_SITEKEY")
 
 app = FastAPI()
 
@@ -30,12 +31,26 @@ class FormData(BaseModel):
     service: str
     companyName: str
     companyUrl: str
+    hcaptcha_response: str
 
 
 @app.post("/submit/")
 @app.post("/submit")  # Handle both with and without trailing slash
 async def submit_form(form_data: FormData):
     try:
+        # Verify CAPTCHA
+        async with httpx.AsyncClient() as client:
+            captcha_response = await client.post(
+                "https://hcaptcha.com/siteverify",
+                data={
+                    "response": form_data.hcaptcha_response,
+                    "secret": HCAPTCHA_SECRET_KEY,
+                },
+            )
+
+        if not captcha_response.json()["success"]:
+            raise HTTPException(status_code=400, detail="Invalid CAPTCHA")
+
         # Format the message for Discord
         message_content = {
             "content": f"New form submission: \n"
