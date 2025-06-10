@@ -8,20 +8,18 @@ DISCORD_WEBHOOK_URL = "https://discord.com/api/webhooks/1298557347165241364/QAeV
 
 app = FastAPI()
 
-# Configure CORS
+origins = [
+    "https://vicentereyes.org",
+    "https://www.vicentereyes.org"
+]
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[
-        "https://vicentereyes.org",
-        "https://www.vicentereyes.org"
-    ],
+    allow_origins=origins,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
-
-
-CORS_ALLOW_CREDENTIALS = True
 
 
 class FormData(BaseModel):
