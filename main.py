@@ -4,13 +4,15 @@ from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 import httpx
 
-DISCORD_WEBHOOK_URL = "https://discord.com/api/webhooks/1298557347165241364/QAeVHEQHuhbHPGK6FCg3KrE0Aj7vYSH0pyIhZ6JGntkS2GhtOUvesMPoap6IRxLAXDoo"
+DISCORD_WEBHOOK_URL = os.environ.get("FASTAPI_DISCORD_WEBHOOK_URL")
 HCAPTCHA_SECRET_KEY = os.environ.get("HCAPTCHA_SITEKEY")
 
 app = FastAPI()
 
 origins = [
-    "https://*.vicentereyes.org"
+    "https://www.vicentereyes.org",
+    "https://prod.vicentereyes.org",
+    "https://vicentereyes.org"
 ]
 
 app.add_middleware(
