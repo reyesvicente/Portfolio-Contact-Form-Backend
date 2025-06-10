@@ -21,6 +21,9 @@ app.add_middleware(
 )
 
 
+CORS_ALLOW_CREDENTIALS = True
+
+
 class FormData(BaseModel):
     name: str
     email: str
